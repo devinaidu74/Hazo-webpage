@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>HAZO - Happy Zone</title>
+    <style>
+        :root {
+            --primary: #05ffee;
+            --background: #f9f9f9;
+            --text: #333;
+            --card-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --button-hover: #00e6d6; /* Slightly darker primary for hover */
+            --coin-color: #FFD700; /* Gold color for coins */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary);
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: relative; /* For coin display positioning */
+        }
+
+        header h1 {
+            font-size: 2.8em;
+            color: #000;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .coin-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .coin-icon {
+            color: var(--coin-color);
+            margin-right: 8px;
+            font-size: 1.5em; /* Larger coin icon */
+        }
+
+        /* Coin bounce animation for the header icon */
+        @keyframes coinBounce {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-5px); }
+            50% { transform: translateY(0); }
+            75% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+
+        .coin-icon.animate-bounce {
+            animation: coinBounce 0.5s ease-out;
+        }
+
+
+        nav {
+            background-color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            box-shadow: 0 2px 6px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav a {
+            color: #444;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            background-color: var(--primary);
+            color: black;
+        }
+
+        section {
+            padding: 40px 20px;
+            text-align: center;
+            flex-grow: 1; /* Allow sections to grow and push footer down */
+        }
+
+        section h2 {
+            font-size: 2em;
+            margin-bottom: 25px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax for better card size */
+            gap: 25px; /* Increased gap */
+            margin-top: 20px;
+            max-width: 1200px; /* Max width for grid container */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: transform 0.3s ease-in-out; /* Added ease-in-out */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Distribute space in card content */
+            padding: 20px; /* Added padding to cards */
+            text-align: left; /* Align text left within cards */
+        }
+
+        .card:hover {
+            transform: translateY(-5px); /* Lift effect */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+        }
+
+        .card img,
+        .card video {
+            width: 100%;
+            display: block;
+            border-radius: 10px; /* Rounded corners for media */
+            margin-bottom: 15px; /* Space below media */
+            object-fit: cover; /* Ensure images cover the area without distortion */
+            height: 200px; /* Fixed height for consistent image appearance */
+        }
+
+        .card-content {
+            flex-grow: 1; /* Allows content to take available space */
+            margin-bottom: 15px;
+        }
+
+        .card-content h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .card-content p {
+            font-size: 1em;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .earn-coins-btn {
+            background-color: var(--coin-color);
+            color: #333;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 15px;
+            align-self: center; /* Center button within card */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            width: fit-content; /* Make button only as wide as its content */
+        }
+
+        .earn-coins-btn:hover {
+            background-color: #e6c200; /* Darker gold on hover */
+            transform: translateY(-2px);
+        }
+
+        .earn-coins-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .coin-earned-message {
+            font-size: 0.9em;
+            color: green;
+            margin-top: 5px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            text-align: center;
+            transform: translateY(10px); /* Start slightly lower */
+        }
+        .coin-earned-message.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0); /* Move to original position */
+        }
+
+        .info-content { /* Reusing privacy-content styles for consistency */
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .info-content h3 {
+            font-size: 1.8em;
+            color: #222;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .info-content p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .info-content ul {
+            list-style: disc;
+            padding-left: 25px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .info-content ul li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+
+        .footer {
+            background-color: #fff;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+            color: #555;
+            margin-top: auto; /* Push footer to the bottom */
+            border-top: 1px solid #ddd;
+            border-radius: 20px 20px 0 0; /* Rounded top corners for footer */
+            box-shadow: 0 -2px 6px var(--shadow);
+        }
+
+        .footer-social-links {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .footer-social-links a {
+            color: #555;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.3s;
+        }
+
+        .footer-social-links a:hover {
+            color: var(--primary); /* Use primary color for hover */
+        }
+
+
+        @media screen and (max-width: 768px) {
+            header h1 {
+                font-size: 2.2em;
+            }
+
+            header p {
+                font-size: 1em;
+            }
+
+            .coin-display {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .coin-icon {
+                font-size: 1.2em;
+            }
+
+            section h2 {
+                font-size: 1.6em;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            nav a {
+                padding: 8px 15px;
+                font-size: 1em;
+            }
+
+            .grid {
+                grid-template-columns: 1fr; /* Single column on small screens */
+                gap: 20px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .card img,
+            .card video {
+                height: 180px; /* Adjust height for smaller screens */
+            }
+
+            .card-content h3 {
+                font-size: 1.2em;
+            }
+
+            .card-content p {
+                font-size: 0.9em;
+            }
+
+            .earn-coins-btn {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .info-content {
+                padding: 20px;
+            }
+            .info-content h3 {
+                font-size: 1.5em;
+            }
+            .info-content p {
+                font-size: 0.95em;
+            }
+            .footer-social-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HAZO 😊</h1>
+        <p>Welcome to your Happy Zone – Memes, Flicks & Skrits!</p>
+        <div class="coin-display">
+            <span class="coin-icon" id="header-coin-icon">💰</span>
+            <span id="coin-balance">0</span> Coins
+        </div>
+    </header>
+
+    <nav>
+        <a href="#memes" class="nav-link active">😂 Memes</a>
+        <a href="#flicks" class="nav-link">🎬 Flicks</a>
+        <a href="#skrits" class="nav-link">🎭 Skrits</a>
+        <a href="#privacy" class="nav-link">🔒 Privacy</a>
+        <a href="#child-safety" class="nav-link">👶 Child Safety</a>
+        <a href="#terms" class="nav-link">📄 Terms</a>
+    </nav>
+
+    <section id="memes">
+        <h2>😂 Memes</h2>
+        <div class="grid">
+            <div class="card">
+                <img src="https://picsum.photos/id/237/600/400" alt="Dog looking up meme" class="w-full h-auto object-cover rounded-xl mb-5 shadow-sm border border-gray-100">
+                <div class="card-content">
+                    <h3>The Loyal Companion</h3>
+                    <p>That moment when your dog looks at you with pure adoration (or is it just for treats?).</p>
+                </div>
+                <button class="earn-coins-btn">Collect 10 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+            <div class="card">
+                <img src="https://picsum.photos/id/238/600/400" alt="Person thinking meme" class="w-full h-auto object-cover rounded-xl mb-5 shadow-sm border border-gray-100">
+                <div class="card-content">
+                    <h3>Deep Thoughts with a Twist</h3>
+                    <p>When you're pondering the universe, but also what's for dinner.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 10 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+            <div class="card">
+                <img src="https://picsum.photos/id/239/600/400" alt="Funny animal reaction meme" class="w-full h-auto object-cover rounded-xl mb-5 shadow-sm border border-gray-100">
+                <div class="card-content">
+                    <h3>Unexpected Reactions</h3>
+                    <p>That priceless expression when something completely out of left field happens.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 10 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="flicks" style="display: none;">
+        <h2>🎬 Flicks</h2>
+        <div class="grid">
+            <div class="card">
+                <video controls class="w-full h-auto rounded-xl mb-5 shadow-sm border border-gray-100">
+                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+                <div class="card-content">
+                    <h3>Calm Waters</h3>
+                    <p>A short film about serene lakes and peaceful sunsets. Perfect for unwinding after a long day.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 15 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+            <div class="card">
+                <video controls class="w-full h-auto rounded-xl mb-5 shadow-sm border border-gray-100">
+                    <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+                <div class="card-content">
+                    <h3>Whispers of the Forest</h3>
+                    <p>Explore the gentle sounds and sights of a vibrant forest ecosystem. Pure tranquility.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 15 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+            <div class="card">
+                <img src="https://picsum.photos/id/240/600/400" alt="Peaceful nature scene" class="w-full h-auto object-cover rounded-xl mb-5 shadow-sm border border-gray-100">
+                <div class="card-content">
+                    <h3>Cozy Rainy Day Animation</h3>
+                    <p>A charming animated short featuring a cozy room and a gentle rain outside.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 15 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="skrits" style="display: none;">
+        <h2>🎭 Skrits</h2>
+        <div class="grid">
+            <div class="card">
+                <img src="https://picsum.photos/id/241/600/400" alt="Flowy summer skirt" class="w-full h-auto object-cover rounded-xl mb-5 shadow-sm border border-gray-100">
+                <div class="card-content">
+                    <h3>Flowy Floral Maxi</h3>
+                    <p>Embrace comfort and style with this vibrant, airy floral maxi skirt.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 5 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+            <div class="card">
+                <img src="https://picsum.photos/id/242/600/400" alt="Stylish denim skirt" class="w-full h-auto object-cover rounded-xl mb-5 shadow-sm border border-gray-100">
+                <div class="card-content">
+                    <h3>Chic A-Line Denim</h3>
+                    <p>A versatile and classic denim skirt, perfect for everyday casual elegance.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 5 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+            <div class="card">
+                <img src="https://picsum.photos/id/243/600/400" alt="Elegant pleated skirt" class="w-full h-auto object-cover rounded-xl mb-5 shadow-sm border border-gray-100">
+                <div class="card-content">
+                    <h3>Elegant Pleated Midi</h3>
+                    <p>Add a touch of sophistication with this graceful pleated midi skirt, ideal for any occasion.</p>
+                </div>
+                <button class="earn-coins-btn">Collect 5 Coins</button>
+                <span class="coin-earned-message">Coins Collected!</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="privacy" style="display: none;">
+        <h2>🔒 Privacy First</h2>
+        <div class="info-content">
+            <h3>Your Data is Always Protected on HAZO</h3>
+            <p>At HAZO, your privacy is our top priority. We believe that a happy zone is a safe zone, and that includes keeping your personal information secure and private. We are committed to a "privacy-first" approach in everything we do.</p>
+            <p>Here’s how we ensure your data is protected:</p>
+            <ul>
+                <li><strong>No Personal Data Collection:</strong> We do not collect any personally identifiable information from you. Your interactions with the content (memes, flicks, skrits) are purely for your enjoyment and stress reduction.</li>
+                <li><strong>Local Storage Only:</strong> The coin balance you earn is stored only on your device using local storage. It is not transmitted to our servers or shared with any third parties. This means your coin data is entirely under your control.</li>
+                <li><strong>No Tracking:</strong> We do not use cookies or other tracking technologies to monitor your browsing habits or personal preferences.</li>
+                <li><strong>Secure by Design:</strong> Our website is designed with security in mind, minimizing any potential vulnerabilities.</li>
+                <li><strong>Transparency:</strong> We are transparent about our data practices. If anything changes, we will update this policy clearly.</li>
+            </ul>
+            <p>Enjoy HAZO with peace of mind, knowing that your privacy is respected and your data is safe with us. Your happy zone is truly yours alone!</p>
+        </div>
+    </section>
+
+    <section id="child-safety" style="display: none;">
+        <h2>👶 Child Safety on HAZO</h2>
+        <div class="info-content">
+            <h3>Creating a Safe and Positive Environment for All Ages</h3>
+            <p>HAZO is designed to be a source of lighthearted fun and stress reduction for everyone, including our younger users. We are committed to providing a safe and positive online environment where children can explore content without encountering inappropriate material.</p>
+            <p>Here are the measures we take to ensure child safety:</p>
+            <ul>
+                <li><strong>Curated Content:</strong> All content, including memes, flicks, and skrits, is carefully selected to be family-friendly and free from any explicit, violent, or otherwise unsuitable material.</li>
+                <li><strong>No User-Generated Content:</strong> HAZO does not allow users to upload or create their own content. This eliminates the risk of inappropriate content being introduced by external sources.</li>
+                <li><strong>No Communication Features:</strong> There are no chat functions, comment sections, or direct messaging capabilities on HAZO. This prevents any unauthorized communication between users.</li>
+                <li><strong>No Personal Information Collection from Children:</strong> Consistent with our overall privacy policy, we do not collect any personal information from children.</li>
+                <li><strong>Simple and Intuitive Interface:</strong> The website's design is kept simple and easy to navigate, making it accessible and understandable for younger users.</li>
+                <li><strong>Parental Guidance Recommended:</strong> While we strive for a safe environment, we always recommend parental supervision for young children using any online platform.</li>
+            </ul>
+            <p>Our goal is for HAZO to be a place where both children and adults can find joy and relaxation in a secure and protected space. If you have any concerns, please refer to our Privacy Policy or contact us.</p>
+        </div>
+    </section>
+
+    <section id="terms" style="display: none;">
+        <h2>📄 Terms and Conditions</h2>
+        <div class="info-content">
+            <h3>Welcome to HAZO - Happy Zone!</h3>
+            <p>These Terms and Conditions ("Terms") govern your use of the HAZO website ("Service"), operated by [Your Company Name/HAZO]. By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service.</p>
+
+            <h4>1. Use of Service</h4>
+            <p>HAZO provides curated content including memes, flicks, and skrits for entertainment and stress reduction purposes. The content is provided "as is" for your personal, non-commercial use. You agree not to use the Service for any unlawful or prohibited activities.</p>
+
+            <h4>2. Intellectual Property</h4>
+            <p>The Service and its original content (excluding content provided by users, if any, which is not applicable here as HAZO does not support user-generated content), features, and functionality are and will remain the exclusive property of [Your Company Name/HAZO] and its licensors. The Service is protected by copyright, trademark, and other laws of both the [Your Country] and foreign countries. Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of [Your Company Name/HAZO].</p>
+
+            <h4>3. Coin System</h4>
+            <p>The coin system on HAZO is purely for gamification and engagement within the Service. Coins have no real-world monetary value, cannot be exchanged for cash or other goods, and are non-transferable. Your coin balance is stored locally on your device and is not tied to any personal identifiable information.</p>
+
+            <h4>4. Disclaimers</h4>
+            <p>Your use of the Service is at your sole risk. The Service is provided on an "AS IS" and "AS AVAILABLE" basis. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.</p>
+
+            <h4>5. Limitation of Liability</h4>
+            <p>In no event shall [Your Company Name/HAZO], nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from (i) your access to or use of or inability to access or use the Service; (ii) any conduct or content of any third party on the Service; (iii) any content obtained from the Service; and (iv) unauthorized access, use or alteration of your transmissions or content, whether based on warranty, contract, tort (including negligence) or any other legal theory, whether or not we have been informed of the possibility of such damage, and even if a remedy set forth herein is found to have failed of its essential purpose.</p>
+
+            <h4>6. Changes to Terms</h4>
+            <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will try to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.</p>
+
+            <h4>7. Contact Us</h4>
+            <p>If you have any questions about these Terms, please contact us at [Your Contact Email/Method].</p>
+            <p class="text-center text-sm text-gray-500 mt-5">Last updated: July 10, 2025</p>
+        </div>
+    </section>
+
+    <div class="footer">
+        &copy; 2025 HAZO - Happy Zone. Made with 😊 for your smiles!
+        <div class="footer-social-links">
+            <a href="https://twitter.com/hazo_happyzone" target="_blank" rel="noopener noreferrer">Twitter</a>
+            <a href="https://instagram.com/hazo_happyzone" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://youtube.com/hazo_happyzone" target="_blank" rel="noopener noreferrer">YouTube</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const coinBalanceDisplay = document.getElementById('coin-balance');
+            const headerCoinIcon = document.getElementById('header-coin-icon');
+            const earnCoinsButtons = document.querySelectorAll('.earn-coins-btn');
+
+            const COINS_STORAGE_KEY = 'hazoCoins';
+            let currentCoins = parseInt(localStorage.getItem(COINS_STORAGE_KEY) || '0', 10);
+
+            // Function to update the coin display
+            const updateCoinDisplay = () => {
+                coinBalanceDisplay.textContent = currentCoins;
+            };
+
+            // Function to show a specific section and hide others
+            const showSection = (id) => {
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById(id).style.display = 'block';
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            // Event listeners for navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    showSection(targetId);
+                });
+            });
+
+            // Event listeners for "Collect Coins" buttons
+            earnCoinsButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const coinsToEarn = parseInt(button.textContent.match(/\d+/)[0], 10); // Extract number from button text
+                    currentCoins += coinsToEarn;
+                    localStorage.setItem(COINS_STORAGE_KEY, currentCoins);
+                    updateCoinDisplay();
+
+                    // Add bounce animation to header coin icon
+                    headerCoinIcon.classList.add('animate-bounce');
+                    headerCoinIcon.addEventListener('animationend', () => {
+                        headerCoinIcon.classList.remove('animate-bounce');
+                    }, { once: true }); // Remove listener after one animation cycle
+
+                    // Show "Coins Collected!" message with pop-up effect
+                    const messageSpan = button.nextElementSibling; // The span right after the button
+                    if (messageSpan && messageSpan.classList.contains('coin-earned-message')) {
+                        messageSpan.classList.add('show');
+                        setTimeout(() => {
+                            messageSpan.classList.remove('show');
+                            // Hide after transition ends to allow re-showing
+                            setTimeout(() => {
+                                messageSpan.style.display = 'none';
+                            }, 500); // Match transition duration
+                        }, 1000); // Display for 1 second
+                    }
+
+                    // Disable the button after collecting
+                    button.disabled = true;
+                    button.textContent = 'Collected!';
+                });
+            });
+
+            // Initialize coin display on load
+            updateCoinDisplay();
+            // Initially show the 'memes' section
+            showSection('memes');
+        });
+    </script>
+</body>
+</html>
